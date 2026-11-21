@@ -11,6 +11,7 @@
 | 本文件 `README.md` | 对外 API、安装、快速开始、能力边界 |
 | `INTEGRATION-GUIDE.md` | **接入主项目**：如何把 SDK 装进「外语考证宝典」、逐文件改动、验收与回滚 |
 | `ARCHITECTURE-AND-GUIDE.md` | **学习与迭代**：整体架构、数据流、核心设计、踩坑记录、扩展点、调试手册 |
+| `PRESENTATION-SCRIPT.md` | **介绍逐字稿**：照着念就能讲清这个组件，含 3 分钟精简版 |
 
 ---
 
