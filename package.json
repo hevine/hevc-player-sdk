@@ -1,0 +1,73 @@
+{
+  "name": "@waiyu/hevc-player",
+  "version": "0.2.0",
+  "description": "统一媒体播放器 SDK —— 一套 API 兼容 H.265/HEVC 视频（纯 WASM 软解）与纯音频（原生播放 + 频谱可视化），支持点播与实时流，含 React 封装。与外语考证宝典主应用零耦合。",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/hevc-player.cjs",
+  "module": "./dist/hevc-player.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/hevc-player.js",
+      "require": "./dist/hevc-player.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite --config vite.demo.config.ts",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview --config vite.demo.config.ts"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@yume-chan/libde265": "^1.0.0",
+    "mp4box": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vitest": "^2.1.0",
+    "ws": "^8.23.0"
+  },
+  "keywords": [
+    "h265",
+    "hevc",
+    "wasm",
+    "libde265",
+    "player",
+    "video",
+    "flv",
+    "mp4"
+  ]
+}

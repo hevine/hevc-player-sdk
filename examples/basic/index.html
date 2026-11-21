@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>统一媒体播放器 · 视频 / 纯音频</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #0f1115; color: #e8eaed; font-family: -apple-system, "Segoe UI", "PingFang SC", sans-serif; }
+      header { padding: 20px 28px; border-bottom: 1px solid #262a33; }
+      h1 { margin: 0; font-size: 18px; font-weight: 600; }
+      header p { margin: 6px 0 0; font-size: 12px; color: #8b93a1; }
+      main { display: flex; gap: 24px; padding: 20px 28px 28px; flex-wrap: wrap; }
+      .stage { flex: 1 1 640px; min-width: 320px; }
+      canvas { width: 100%; aspect-ratio: 16/9; background: #0b1020; border-radius: 8px; border: 1px solid #262a33; display: block; }
+      .stage-bar { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+      .stage-bar .stat { flex: 0 0 auto; border: none; padding: 0; gap: 8px; }
+      .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+      .tab { flex: 0 0 auto; padding: 8px 16px; border: 1px solid #2b303b; border-radius: 20px; background: #171a21; color: #9aa3b2; font-size: 12px; cursor: pointer; }
+      .tab.active { background: #3b6ef5; border-color: #3b6ef5; color: #fff; }
+      .panel { flex: 0 1 320px; background: #171a21; border: 1px solid #262a33; border-radius: 8px; padding: 18px; }
+      .panel h2 { font-size: 13px; margin: 0 0 12px; color: #9aa3b2; text-transform: uppercase; letter-spacing: .05em; }
+      label { display: block; font-size: 12px; color: #8b93a1; margin: 12px 0 4px; }
+      input, select { width: 100%; padding: 8px 10px; background: #0f1115; border: 1px solid #2b303b; color: #e8eaed; border-radius: 6px; font-size: 12px; }
+      input[type=range] { padding: 0; accent-color: #3b6ef5; }
+      .row { display: flex; gap: 8px; margin-top: 14px; }
+      button { flex: 1; padding: 9px; border: none; border-radius: 6px; background: #3b6ef5; color: #fff; font-size: 13px; cursor: pointer; }
+      button.secondary { background: #2b303b; }
+      button:hover { filter: brightness(1.1); }
+      button:disabled { opacity: .45; cursor: default; }
+      .stat { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #22262f; }
+      .stat span:last-child { color: #7fd1a8; font-variant-numeric: tabular-nums; }
+      .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #243044; color: #8ab4ff; }
+      .badge.playing { background: #1e3a2c; color: #7fd1a8; }
+      .badge.error { background: #3a1e22; color: #ff8a94; }
+      .badge.audio { background: #2c2440; color: #c9a8ff; }
+      .err { margin-top: 12px; padding: 10px; border-radius: 6px; background: #2a1719; color: #ffb0b6; font-size: 12px; }
+      .hint { font-size: 11px; color: #6b7280; line-height: 1.6; margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>统一媒体播放器 · 视频 / 纯音频</h1>
+      <p>同一套视觉外壳与 API · 视频走 H265 WASM 软解，纯音频走原生播放 + Web Audio 频谱柱 / 呼吸光晕</p>
+    </header>
+    <main>
+      <div class="stage">
+        <div class="tabs">
+          <button class="tab active" id="tab-video">🎬 视频演示（H265）</button>
+          <button class="tab" id="tab-audio">🎵 纯音频演示（频谱）</button>
+        </div>
+        <canvas id="screen" width="960" height="540"></canvas>
+        <div class="stage-bar">
+          <span id="state" class="badge">idle</span>
+          <span id="typename" class="badge">-</span>
+          <div class="stat"><span>音量</span><span id="volval">100%</span></div>
+        </div>
+      </div>
+      <aside class="panel">
+        <h2>播放控制</h2>
+        <label>媒体地址</label>
+        <input id="url" value="/test-hevc.mp4" />
+        <label>媒体类型</label>
+        <select id="mtype">
+          <option value="auto">自动探测</option>
+          <option value="video">强制视频（H265）</option>
+          <option value="audio">强制纯音频（频谱）</option>
+        </select>
+        <label>数据源类型（视频用）</label>
+        <select id="kind">
+          <option value="url">自动（按后缀探测）</option>
+          <option value="mp4">MP4 点播</option>
+          <option value="flv">FLV</option>
+          <option value="raw">Annex-B 裸流</option>
+          <option value="ws-flv">WebSocket FLV</option>
+          <option value="ws-raw">WebSocket 裸流</option>
+        </select>
+        <label>音量 <span id="vol-label">100%</span></label>
+        <input type="range" id="volume" min="0" max="100" value="100" />
+        <div class="row">
+          <button id="load">加载</button>
+          <button id="play" disabled>播放</button>
+          <button id="pause" disabled>暂停</button>
+          <button id="stop" class="secondary" disabled>停止</button>
+        </div>
+        <h2 style="margin-top:24px">运行时统计</h2>
+        <div class="stat"><span>解码/渲染帧数</span><span id="decoded">0</span></div>
+        <div class="stat"><span>丢弃帧数</span><span id="dropped">0</span></div>
+        <div class="stat"><span>缓冲帧</span><span id="buffered">0</span></div>
+        <div class="stat"><span>帧率</span><span id="fps">0</span></div>
+        <div class="stat"><span>位置 (s)</span><span id="pos">0.0</span></div>
+        <div class="stat"><span>分辨率</span><span id="res">-</span></div>
+        <div class="stat"><span>音频能量</span><span id="energy">0.00</span></div>
+        <div id="err" class="err" style="display:none"></div>
+        <p class="hint">切到「纯音频演示」会加载内置 WAV 测试音源（和弦+低频脉冲，8 秒循环可重播）。频谱柱与呼吸光晕来自真实 Web Audio 分析数据。文件在 examples/basic/public/ 下。</p>
+      </aside>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
