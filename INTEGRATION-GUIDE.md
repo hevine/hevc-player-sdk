@@ -2,7 +2,7 @@
 
 > **文档用途**：给新任务 / 新 agent 的一站式接入说明。照着做完，就能在主应用里用**一套播放器**播放 H265 视频与纯音频（含频谱可视化），且与现有 TTS 朗读链路零耦合。
 >
-> **目标 SDK**：`@waiyu/hevc-player` v0.2，源码位于
+> **目标 SDK**：`@waiyubaodian/hevc-player` v0.2，源码位于
 > `/Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk/`
 >
 > **主项目**：`/Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian/`
@@ -68,7 +68,7 @@ cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian
 npm install file:/Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk
 ```
 
-这会在 `package.json` 写入 `"@waiyu/hevc-player": "file:..."`，并在 `node_modules/@waiyu/hevc-player` 建立符号链接。
+这会在 `package.json` 写入 `"@waiyubaodian/hevc-player": "file:..."`，并在 `node_modules/@waiyubaodian/hevc-player` 建立符号链接。
 
 > **迭代注意**：SDK 每次改完源码都要重新 `npm run build`；主项目因为是软链，`dist` 更新后刷新页面即可生效（Vite 缓存异常时 `npm run clean:cache`）。
 
@@ -76,9 +76,9 @@ npm install file:/Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk
 
 ```bash
 cd /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk
-npm pack            # 生成 waiyu-hevc-player-0.2.0.tgz
+npm pack            # 生成 waiyubaodian-hevc-player-0.2.0.tgz
 cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian
-npm install /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk/waiyu-hevc-player-0.2.0.tgz
+npm install /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk/waiyubaodian-hevc-player-0.2.0.tgz
 ```
 
 适合给主项目一个「冻结版本」，不受 SDK 后续改动影响。
@@ -89,7 +89,7 @@ npm install /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk/waiyu-hevc
 cd /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk
 npm publish --access public        # 或配置私有 registry
 cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian
-npm install @waiyu/hevc-player@0.2
+npm install @waiyubaodian/hevc-player@0.2
 ```
 
 > ⚠️ 合规：SDK 用了 `@yume-chan/libde265`（**LGPL-3.0**），H265 涉及专利池。商用发布前请法务评估（见 SDK README）。本地 / 内网使用不受此限。
@@ -98,7 +98,7 @@ npm install @waiyu/hevc-player@0.2
 
 ```bash
 cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian
-PATH=/usr/local/bin:$PATH node -e "import('@waiyu/hevc-player').then(m=>console.log(Object.keys(m)))"
+PATH=/usr/local/bin:$PATH node -e "import('@waiyubaodian/hevc-player').then(m=>console.log(Object.keys(m)))"
 # 期望输出含 MediaPlayer, H265Player, AudioPlayer, detectMediaType ...
 ```
 
@@ -109,8 +109,8 @@ PATH=/usr/local/bin:$PATH node -e "import('@waiyu/hevc-player').then(m=>console.
 ### 3.1 SDK 对外 API 速查
 
 ```ts
-import { MediaPlayer, detectMediaType } from '@waiyu/hevc-player';
-import { MediaPlayerView, useMediaPlayer } from '@waiyu/hevc-player/react'; // React 子路径
+import { MediaPlayer, detectMediaType } from '@waiyubaodian/hevc-player';
+import { MediaPlayerView, useMediaPlayer } from '@waiyubaodian/hevc-player/react'; // React 子路径
 
 // 核心容器：MediaPlayer（一套 API 兼容两种媒体）
 new MediaPlayer({
@@ -154,8 +154,8 @@ public/media/                         ← 新增（可选）：放测试用的�
  * 与现有 TTS 朗读链路（useVoicePlayer / useSpeech）完全独立。
  */
 import { useRef, useState } from 'react';
-import { MediaPlayerView, type MediaPlayerHandle } from '@waiyu/hevc-player/react';
-import type { MediaType } from '@waiyu/hevc-player';
+import { MediaPlayerView, type MediaPlayerHandle } from '@waiyubaodian/hevc-player/react';
+import type { MediaType } from '@waiyubaodian/hevc-player';
 
 const DEMOS = {
   video: '/media/demo-hevc.mp4',   // 需自备 H265 编码的 mp4
@@ -294,8 +294,8 @@ PATH=/usr/local/bin:$PATH npm run dev         # 打开 http://localhost:5199/#/m
 ```ts
 // web/src/hooks/useSharedMediaPlayer.ts
 import { useEffect, useRef, useState } from 'react';
-import { MediaPlayer } from '@waiyu/hevc-player';
-import type { MediaPlayerOptions, PlayerState } from '@waiyu/hevc-player';
+import { MediaPlayer } from '@waiyubaodian/hevc-player';
+import type { MediaPlayerOptions, PlayerState } from '@waiyubaodian/hevc-player';
 
 let shared: MediaPlayer | null = null;
 const listeners = new Set<() => void>();
@@ -384,7 +384,7 @@ canvasStyle={{ width: '100%', aspectRatio: '16 / 9', borderRadius: 8, background
 
 | 现象 | 原因 / 处理 |
 |---|---|
-| `Cannot find module '@waiyu/hevc-player'` | SDK 未 build 或未 install；确认 `node_modules/@waiyu/hevc-player/dist/index.d.ts` 存在 |
+| `Cannot find module '@waiyubaodian/hevc-player'` | SDK 未 build 或未 install；确认 `node_modules/@waiyubaodian/hevc-player/dist/index.d.ts` 存在 |
 | 改了 SDK 源码主项目没生效 | 方式 A 需重新 `npm run build`；再 `npm run clean:cache` 清 Vite 缓存 |
 | H265 视频黑屏 | 素材不是 HEVC 编码（H264 不支持）；或容器格式判错，显式传 `sourceKind: 'mp4'` / `container: 'mp4'` |
 | 音频有声音但无频谱 | 音频跨域且未授权 CORS；设 `audioCrossOrigin: true` 并确认服务端返回 CORS 头 |
@@ -400,7 +400,7 @@ canvasStyle={{ width: '100%', aspectRatio: '16 / 9', borderRadius: 8, background
 
 1. 删除新增的 `web/src/pages/MediaPlayerDemo.tsx`（及阶段 2 的 hook / 样式）；
 2. 撤销 `App.tsx` / `Layout.tsx` 的路由与入口改动；
-3. `npm uninstall @waiyu/hevc-player`；
+3. `npm uninstall @waiyubaodian/hevc-player`；
 4. 删除测试素材 `web/public/media/`。
 
 现有朗读 / 音色 / 考试代码一行未改，无需回滚。
@@ -409,4 +409,4 @@ canvasStyle={{ width: '100%', aspectRatio: '16 / 9', borderRadius: 8, background
 
 ## 8. 一句话交给新任务
 
-> 先用 `npm install file:<SDK路径>` 把 `@waiyu/hevc-player@0.2` 接进来，按本文 3.3 新建独立演示页跑通「H265 视频 + 纯音频频谱」两条路径，再按阶段 2 做全局单例避免串台；全程不动现有 `useVoicePlayer / useSpeech / useVoiceSystem`，所有主项目命令记得加 `PATH=/usr/local/bin:$PATH`。
+> 先用 `npm install file:<SDK路径>` 把 `@waiyubaodian/hevc-player@0.2` 接进来，按本文 3.3 新建独立演示页跑通「H265 视频 + 纯音频频谱」两条路径，再按阶段 2 做全局单例避免串台；全程不动现有 `useVoicePlayer / useSpeech / useVoiceSystem`，所有主项目命令记得加 `PATH=/usr/local/bin:$PATH`。

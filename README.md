@@ -1,4 +1,4 @@
-# @waiyu/hevc-player
+# @waiyubaodian/hevc-player
 
 > 独立的 **H.265 / HEVC 播放器 SDK**：纯 WASM 软解，支持**点播文件**与**实时流**，提供框架无关内核 + React 封装。
 > 为「外语考证宝典」的播放器升级而设计，但**与主应用零耦合**，可独立发布、独立演进。
@@ -12,6 +12,7 @@
 | `INTEGRATION-GUIDE.md` | **接入主项目**：如何把 SDK 装进「外语考证宝典」、逐文件改动、验收与回滚 |
 | `ARCHITECTURE-AND-GUIDE.md` | **学习与迭代**：整体架构、数据流、核心设计、踩坑记录、扩展点、调试手册 |
 | `PRESENTATION-SCRIPT.md` | **介绍逐字稿**：照着念就能讲清这个组件，含 3 分钟精简版 |
+| `PUBLISH-GUIDE.md` | **发布引导**：登录 npm、创建 scope 组织、dry-run 自检、正式发布、错误对照表 |
 
 ---
 
@@ -75,7 +76,7 @@
 ## 4. 安装
 
 ```bash
-npm install @waiyu/hevc-player
+npm install @waiyubaodian/hevc-player
 # React 封装为可选子路径，需项目已有 react/react-dom
 ```
 
@@ -86,7 +87,7 @@ npm install @waiyu/hevc-player
 ## 5. 快速开始（框架无关内核）
 
 ```ts
-import { H265Player } from '@waiyu/hevc-player';
+import { H265Player } from '@waiyubaodian/hevc-player';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#video')!;
 const player = new H265Player({ canvas, logLevel: 'warn' });
@@ -117,7 +118,7 @@ player.play();
 ### 5.1 统一播放器（视频 + 纯音频）
 
 ```ts
-import { MediaPlayer } from '@waiyu/hevc-player';
+import { MediaPlayer } from '@waiyubaodian/hevc-player';
 
 const player = new MediaPlayer({
   canvas,
@@ -149,7 +150,7 @@ await player.destroy();
 ## 6. React 封装
 
 ```tsx
-import { H265PlayerView, type H265PlayerHandle } from '@waiyu/hevc-player/react';
+import { H265PlayerView, type H265PlayerHandle } from '@waiyubaodian/hevc-player/react';
 import { useRef } from 'react';
 
 function LessonPlayer() {
@@ -174,7 +175,7 @@ function LessonPlayer() {
 或用 Hook 自绘控制栏：
 
 ```tsx
-import { useH265Player } from '@waiyu/hevc-player/react';
+import { useH265Player } from '@waiyubaodian/hevc-player/react';
 
 function CustomPlayer() {
   const { canvasRef, state, stats, load, play, pause } = useH265Player({ sourceKind: 'mp4' });
@@ -192,7 +193,7 @@ function CustomPlayer() {
 ### 6.1 统一组件（音频 / 视频一套 UI）
 
 ```tsx
-import { MediaPlayerView, type MediaPlayerHandle } from '@waiyu/hevc-player/react';
+import { MediaPlayerView, type MediaPlayerHandle } from '@waiyubaodian/hevc-player/react';
 import { useRef } from 'react';
 
 function UniversalPlayer({ src, type }: { src: string; type: 'audio' | 'video' }) {
@@ -301,10 +302,24 @@ npm run dev           # 演示页 http://localhost:5188
 
 ## 10. 许可与合规 ⚠️
 
-- 本 SDK 源码：MIT。
-- **解码内核 `libde265` 为 LGPL-3.0-only**（见其 `node_modules/@yume-chan/libde265/package.json`）。以动态/独立模块方式使用通常符合 LGPL，但**商业闭源分发前请法务确认**。
-- **H.265/HEVC 涉及专利池（Access Advance / MPEG-LA 等）**，商业部署需单独评估专利授权，这与代码的开源许可无关。
-- 演示用测试流来自 h265web.js 开源项目仓库，仅用于本地验证。
+**使用范围**：本项目为**个人学习与研究用途**，供「外语考证宝典」本地集成，不用于商业产品。但请注意，该声明是**使用意图**，不改变许可证授予的权利，也不消除下列客观风险。完整声明见 [`NOTICE.md`](./NOTICE.md)。
+
+| 许可层次 | 说明 |
+|---|---|
+| 本 SDK 源码 | **MIT**（含不可撤销的商用授权） |
+| 解码内核 `libde265` | **LGPL-3.0-only**；随包分发需提供对应源码、允许替换该库 → 获取方式见 `NOTICE.md` |
+| `mp4box` | **BSD-3-Clause**（宽松，无强制源码义务） |
+| H.265/HEVC 专利 | 涉及专利池（Access Advance / MPEG-LA），按使用行为/数量授权，**不存在「非商用即豁免」** |
+
+**三点必须知道的结论**：
+
+1. **「非商用」不能免除专利风险** —— 专利许可是按使用行为授权，不按是否盈利区分。
+2. **不能给本包加「非商用」许可** —— 包内含 LGPL-3.0 组件，LGPL 禁止附加额外限制；加限制反而违反 LGPL。
+3. **MIT 一旦分发即不可撤销** —— 获得副本的人可依 MIT 商用，README 备注无法律约束力。
+
+**真正降低风险的方式**：**不公开分发**（仅本地 `file:` 引用），此时专利风险最低、亦不触发 LGPL 分发义务。若必须公开分发，请自行完成 LGPL 源码提供义务并做专利评估。
+
+> 演示用测试流来自 h265web.js 开源项目，仅用于本地验证，请勿再分发。
 
 ---
 
