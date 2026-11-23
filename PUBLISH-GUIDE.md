@@ -1,7 +1,26 @@
 # 发布引导：把 `@waiyubaodian/hevc-player` 发到 npm 公网
 
-> 本文是「你自己登录、我来发布」的操作手册，全程约 3 分钟。
-> 当前状态：包已改名并重新构建完毕，28 项测试全绿，`npm pack` 42 个文件 / 1.5 MB，只差登录这一步。
+> ## 🟢 当前决定（2026-11-22）：**暂不发布，保持本地运行**
+>
+> 本文下半部分是「以后想发布时」的完整手册，**现在不需要执行**。当前接入方式是本地 `file:` 软链，已验证可用：
+>
+> - 主项目 `waiyu-baodian/package.json`：`"@waiyubaodian/hevc-player": "file:../../2026-11-20-22-40-00/hevc-player-sdk"`
+> - `node_modules/@waiyubaodian/hevc-player` 是指向 SDK 的软链，SDK 改代码后主项目**立刻生效**，无需重新发版
+> - 本地启动（注意用 `localhost`，Vite 只绑 IPv6 `::1`，`127.0.0.1` 连不上）：
+>   ```bash
+>   # 后端（若未运行）
+>   cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian && PATH=/usr/local/bin:$PATH npm start
+>   # 前端 5199（代理到后端 4399）
+>   cd /Users/zhua/WorkBuddy/2026-11-04-12-41-53/waiyu-baodian && PATH=/usr/local/bin:$PATH npm run dev:web
+>   # 播放器独立演示页 5188
+>   cd /Users/zhua/WorkBuddy/2026-11-20-22-40-00/hevc-player-sdk && npm run dev
+>   ```
+> - 打开：主应用 http://localhost:5199/ ；播放器演示 http://localhost:5188/ ；健康检查 http://localhost:5199/api/health
+> - 质量门：`tsc --noEmit` 0 错误、`vite build` 成功、SDK 28/28 测试通过
+>
+> **恢复发布时**：先解决登录阻塞（`npm config delete //registry.npmjs.org/:_authToken` → `npm login`，见第 1 节），再按第 2～5 节执行。
+
+---
 
 ---
 
@@ -50,6 +69,16 @@ npm login
 ```
 
 npm 10 默认走**浏览器授权**：终端打印一个 URL 并自动开浏览器，点 `Authorize`，终端显示 `Logged in` 即可。
+
+> 🔴 **当前阻塞点（2026-11-22 实测）**：`~/.npmrc` 里已有一条 `//registry.npmjs.org/:_authToken`，但 `npm whoami` 返回 **401 Unauthorized**，说明这个 token 已失效/被撤销，直接 `npm publish` 必然失败。先清掉它再登录：
+>
+> ```bash
+> npm config delete //registry.npmjs.org/:_authToken
+> npm login
+> npm whoami
+> ```
+>
+> 或者直接在 https://www.npmjs.com/settings/~/tokens 重新生成一个 **Automation** token 覆盖写入。
 
 > ⚠️ **用你的新用户名登录**。因为你走过一次账户转组织，旧用户名已经变成组织、无法再作为用户登录。
 
@@ -133,13 +162,14 @@ echo "✓ 从公网安装并解析成功"
 
 回对话里说一声，我会自动完成：
 
-1. 目标项目 `package.json` 里的
-   `"@waiyu/hevc-player": "file:../../2026-11-20-22-40-00/hevc-player-sdk"`
+> ✅ **2026-11-22 已提前做完**：主项目的包名已统一为 `@waiyubaodian/hevc-player`（`package.json`、3 处 import、2 份交接文档、lock 全部同步），`node_modules/@waiyubaodian/hevc-player` 软链已重建，`typecheck` 0 错误、`vite build` 成功。所以发布后只剩改版本号这一步。
+
+1. 目标项目 `package.json` 里
+   `"@waiyubaodian/hevc-player": "file:../../2026-11-20-22-40-00/hevc-player-sdk"`
    → `"@waiyubaodian/hevc-player": "^0.2.0"`
-2. 目标项目里所有 `from '@waiyu/hevc-player'` → `from '@waiyubaodian/hevc-player'`（含 `/react` 子路径）
-3. 重新 `npm install`，确认 `node_modules/@waiyubaodian/hevc-player` 从软链变成实体目录
-4. 跑 `typecheck` + `build` 验证接入无损
-5. 保留 `file:` 软链方式作为回滚方案
+2. 重新 `npm install`，确认 `node_modules/@waiyubaodian/hevc-player` 从软链变成实体目录
+3. 跑 `typecheck` + `build` 验证接入无损
+4. 保留 `file:` 软链方式作为回滚方案（把第 1 步的依赖值改回 `file:` 路径即可）
 
 ---
 
